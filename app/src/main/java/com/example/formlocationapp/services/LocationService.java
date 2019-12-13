@@ -105,10 +105,12 @@ public class LocationService extends Service {
                     startsWorking(getLocationListener());
                 } else if (action.equals(INTENT_STOP_TRACKING)) {
                     stopsWorking(getLocationListener());
+                    return super.onStartCommand(intent, flags, startId);
                 }
             }
         }
-        return super.onStartCommand(intent, flags, startId);
+        startsWorking(getLocationListener());
+        return START_STICKY;
     }
 
     @NonNull
@@ -131,6 +133,8 @@ public class LocationService extends Service {
         super.onDestroy();
     }
 
+    f
+
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
@@ -145,6 +149,7 @@ public class LocationService extends Service {
     }
 
     private void showLocationToast(Location location) {
+        Log.d(TAG, "IMEI: " + getImei() + " LOCATION: " + location.getLatitude() + "," + location.getLongitude());
         if (location != null) {
             Toast.makeText(this, "IMEI: " + getImei() + "\nLOCATION: " + location.getLatitude() + "," + location.getLongitude(), Toast.LENGTH_LONG).show();
         }
