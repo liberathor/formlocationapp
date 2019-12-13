@@ -133,8 +133,6 @@ public class LocationService extends Service {
         super.onDestroy();
     }
 
-    f
-
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
