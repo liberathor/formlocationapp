@@ -13,7 +13,9 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class PlayServicesManager extends GpsSettings implements GpsManagerProxy, GoogleApiClient.ConnectionCallbacks {
+import javax.annotation.Nullable;
+
+public class PlayServicesManager implements GpsManagerProxy, GoogleApiClient.ConnectionCallbacks {
     private static final int DEFAULT_ELAPSED_TIME_TO_UPDATE_GPS = 3 * 60 * 1000;
     private final GoogleApiClient.ConnectionCallbacks mCallback;
     private LocationRequest mLocationRequest;
@@ -59,9 +61,12 @@ public class PlayServicesManager extends GpsSettings implements GpsManagerProxy,
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, locationListener);
     }
 
+    @Nullable
     @Override
     public Location getLastKnowLocation(Context context) {
         if (checkLocationPermission(context))
+            return null;
+        if (!mGoogleApiClient.isConnected())
             return null;
         return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }

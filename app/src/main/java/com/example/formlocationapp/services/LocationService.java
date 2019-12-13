@@ -1,6 +1,7 @@
 package com.example.formlocationapp.services;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +24,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
+import com.google.common.base.Strings;
 
 
 public class LocationService extends Service {
@@ -53,7 +55,7 @@ public class LocationService extends Service {
     public static void stopTracking(Context context) {
         Intent intent = new Intent(context, LocationService.class);
         intent.setAction(LocationService.INTENT_STOP_TRACKING);
-        context.startService(intent);
+        context.stopService(intent);
     }
 
     @Override
@@ -100,29 +102,23 @@ public class LocationService extends Service {
         Log.d(TAG, "onStartCommand() " + intent);
         if (intent != null) {
             String action = intent.getAction();
-            if (action != null) {
+            if (!Strings.isNullOrEmpty(action)) {
                 if (action.equals(INTENT_START_TRACKING)) {
-                    startsWorking(getLocationListener());
-                } else if (action.equals(INTENT_STOP_TRACKING)) {
-                    stopsWorking(getLocationListener());
-                    return super.onStartCommand(intent, flags, startId);
+                    if (!mIsTracking) {
+                        startsWorking();
+                    }
                 }
             }
         }
-        startsWorking(getLocationListener());
         return START_STICKY;
     }
+
 
     @NonNull
     private LocationListener getLocationListener() {
         if (mLocationListener == null) {
             synchronized (LOCK) {
-                mLocationListener = new LocationListener() {
-                    @Override
-                    public void onLocationChanged(Location location) {
-                        showLocationToast(location);
-                    }
-                };
+                mLocationListener = this::showLocationToast;
             }
         }
         return mLocationListener;
@@ -131,6 +127,8 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy()");
+        stopsWorking();
     }
 
     @Override
@@ -138,21 +136,22 @@ public class LocationService extends Service {
         return mBinder;
     }
 
-    private void startsWorking(LocationListener mLocationListener) {
+    private void startsWorking() {
         mIsTracking = true;
     }
 
-    private void stopsWorking(LocationListener mLocationListener) {
+    private void stopsWorking() {
         mIsTracking = false;
+        mGpsManagerProxy.stopUpdates(this, getLocationListener());
+        mGpsManagerProxy = null;
     }
 
     private void showLocationToast(Location location) {
         Log.d(TAG, "IMEI: " + getImei() + " LOCATION: " + location.getLatitude() + "," + location.getLongitude());
-        if (location != null) {
-            Toast.makeText(this, "IMEI: " + getImei() + "\nLOCATION: " + location.getLatitude() + "," + location.getLongitude(), Toast.LENGTH_LONG).show();
-        }
+        Toast.makeText(this, "IMEI: " + getImei() + "\nLOCATION: " + location.getLatitude() + "," + location.getLongitude(), Toast.LENGTH_LONG).show();
     }
 
+    @SuppressLint("HardwareIds")
     public String getImei() {
         if (checkPhoneStatePermission())
             return "Check permissions";

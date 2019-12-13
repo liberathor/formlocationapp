@@ -1,7 +1,6 @@
 package com.example.formlocationapp;
 
 import android.content.Context;
-import android.content.DialogInterface;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -15,18 +14,8 @@ public class AlertBuilder {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(resoruceMessage)
                 .setCancelable(false)
-                .setNegativeButton("Close", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mOnResponse.onResponse(false);
-                    }
-                })
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mOnResponse.onResponse(true);
-                    }
-                });
+                .setNegativeButton("Close", (dialog, which) -> mOnResponse.onResponse(false))
+                .setPositiveButton("Ok", (dialog, which) -> mOnResponse.onResponse(true));
         mAlertDialog = builder.create();
         mAlertDialog.show();
     }

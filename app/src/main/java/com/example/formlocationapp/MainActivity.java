@@ -15,7 +15,7 @@ import com.example.formlocationapp.services.LocationService;
 import com.example.formlocationapp.ui.main.MainFragment;
 import com.example.formlocationapp.ui.main.MapsActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainFragment.OnFragmentInteractionListener {
     public static final String ACTION_REQUEST_PERMISSIONS = "ACTION_REQUEST_PERMISSIONS";
     private static final int MY_PERMISSION_REQUEST_STORAGE = 7620;
     private static final int MY_PERMISSION_REQUEST_LOCATION = 1243;
@@ -90,5 +90,13 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(MainActivity.this, new String[]{permissionToRequest}, myPermissionRequestId);
             }
         }
+    }
+
+    @Override
+    public void setStatusTracking(boolean tracking) {
+        if (tracking)
+            startTracking();
+        else
+            stopTracking();
     }
 }
